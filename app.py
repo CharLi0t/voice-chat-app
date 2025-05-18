@@ -59,7 +59,7 @@ st.markdown("""
             font-size: 22px;
         }
         h1 {
-            font-size: 42px;
+            font-size: 22px;
         }
     </style>
 """, unsafe_allow_html=True)
