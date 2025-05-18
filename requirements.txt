@@ -1,0 +1,10 @@
+streamlit
+audio_recorder_streamlit
+openai-whisper
+gtts
+requests
+uuid
+pygame
+faster-whisper
+scipy
+sounddevice
