@@ -9,7 +9,7 @@ import glob
 import base64
 
 # ---------- CONFIG ----------
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = st.secrets["OPENROUTER_API_KEY"]
 MODEL = "openai/gpt-3.5-turbo"
 
 headers = {
@@ -18,7 +18,6 @@ headers = {
     "X-Title": "Voice Chat"
 }
 
-# ---------- FUNCTIONS ----------
 @st.cache_resource
 def load_model():
     return whisper.load_model("base")
@@ -35,10 +34,9 @@ def transcribe(audio_bytes):
     with open(filename, "wb") as f:
         f.write(audio_bytes)
     model = load_model()
-    result = model.transcribe(filename, language='th')  # ← ล็อกภาษาไทย
+    result = model.transcribe(filename, language='th')
     os.remove(filename)
     return result["text"]
-
 
 def chat_with_openrouter(prompt):
     data = {
@@ -58,29 +56,22 @@ def speak_text(text):
     cleanup_old_audio()
     tts = gTTS(text=text, lang='th')
     filename = f"reply_{uuid.uuid4().hex}.mp3"
-    try:
-        tts.save(filename)
-        st.success(f"✅ สร้างเสียงสำเร็จ: {filename}")
-    except Exception as e:
-        st.error(f"❌ ไม่สามารถสร้างเสียง: {e}")
+    tts.save(filename)
     return filename
-
-
 
 def autoplay_audio(file_path):
     try:
         with open(file_path, "rb") as f:
             audio_bytes = f.read()
             b64 = base64.b64encode(audio_bytes).decode()
-            md = f"""
+            md = f'''
             <audio autoplay="true">
                 <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
             </audio>
-            """
+            '''
             st.markdown(md, unsafe_allow_html=True)
     except Exception as e:
         st.error(f"❌ ไม่สามารถเล่นเสียง: {e}")
-
 
 # ---------- UI ----------
 st.set_page_config(page_title="Voice Chat", layout="centered")
@@ -91,20 +82,9 @@ st.markdown("""
             font-family: "Cordia New", sans-serif;
             font-size: 22px;
         }
-
-        h1 {
-            font-size: 42px !important;
-        }
-
-        .title-container p {
-            font-size: 42px !important;
-        }
-
-        .chat-box {
-            font-size: 42px;
-            line-height: 1.6;
-        }
-
+        h1 { font-size: 42px !important; }
+        .title-container p { font-size: 42px !important; }
+        .chat-box { font-size: 42px; line-height: 1.6; }
         .stButton > button {
             font-size: 36px !important;
             padding: 10px 20px;
@@ -112,9 +92,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
-
-# ----- Title -----
 st.markdown("""
     <div class="title-container">
         <h1>🎤 Voice Chat กับ AI</h1>
@@ -122,15 +99,10 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# ----- Audio Recorder -----
 st.markdown('<div class="center-box">', unsafe_allow_html=True)
-audio = audio_recorder(
-    text='🟢 กดเพื่อพูด',
-    icon_size="4x"
-)
+audio = audio_recorder(text='🟢 กดเพื่อพูด', icon_size="4x")
 st.markdown('</div>', unsafe_allow_html=True)
 
-# ----- Chat Process -----
 if audio:
     st.info("🔁 ถอดเสียงพูด...")
     text = transcribe(audio)
@@ -142,5 +114,5 @@ if audio:
 
     st.info("🔊 กำลังพูดคำตอบ...")
     reply_file = speak_text(reply)
-    autoplay_audio(reply_file)  # ✅ เล่นทันที
+    autoplay_audio(reply_file)
     st.audio(reply_file, format="audio/mp3")
