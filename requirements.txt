@@ -4,7 +4,3 @@ openai-whisper
 gtts
 requests
 uuid
-pygame
-faster-whisper
-scipy
-sounddevice
